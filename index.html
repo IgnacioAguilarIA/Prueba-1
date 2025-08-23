@@ -1,91 +1,150 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>PUTAAAAAAAAAAAAAAAAAAAAAAAA</title>
-  <style>
-    :root{
-      --bg:#fff7f0; --accent:#ff7f34; --accent-2:#ffb26b; --muted:#463834;
-      --card:#fff8f2; --panel:#fff3e6;
-    }
-    *{box-sizing:border-box}
-    body{
-    margin:0;
-    font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
-    background:linear-gradient(180deg,#fffdfc 0%,var(--bg) 100%);
-    color:var(--muted);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-    padding-bottom:170px;
-  }
-  
-  /* HEADER */
-  header{
-    position:sticky; top:0; z-index:120;
-    display:flex; align-items:center; gap:12px;
-    justify-content:space-between;
-    padding:12px 14px;
-    background:linear-gradient(90deg,var(--accent),var(--accent-2));
-    color:white;
-    box-shadow:
-    0 8px 20px rgba(0,0,0,0.12);
-  }
-  
-  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:0.2px}
-
-  .controls{display:flex;gap:8px;align-items:center}
-  .search{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);
-    padding:6px;border-radius:10px;backdrop-filter: blur(4px);}
-  .search input{border:0;background:transparent;color:white;padding:8px 6px;outline:none;width:200px;font-weight:600;}
-  .header-btn{background:transparent;border:1px solid rgba(255,255,255,0.2);color:white;padding:8px 10px;border-radius:10px;font-weight:700;cursor:pointer}
-  .header-btn:hover{transform:translateY(-2px)}
-
-  </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PUTAAAAAAAAAAAAAAAAAAAAAAAA</title>
+    <style>
+        :root {
+          --bg: #fff7f0;
+          --accent: #ff7f34;
+          --accent-2: #ffb26b;
+          --muted: #463834;
+          --card: #fff8f2;
+          --panel: #fff3e6;
+        }
+    
+        * {
+          box-sizing: border-box
+        }
+    
+        body {
+          margin: 0;
+          font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+          background: linear-gradient(180deg, #fffdfc 0%, var(--bg) 100%);
+          color: var(--muted);
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          padding-bottom: 170px;
+        }
+    
+        /* HEADER */
+        header {
+          position: sticky;
+          top: 0;
+          z-index: 120;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          justify-content: space-between;
+          padding: 12px 14px;
+          background: linear-gradient(90deg, var(--accent), var(--accent-2));
+          color: white;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+    
+        header h1 {
+          font-size: 18px;
+          margin: 0;
+          font-weight: 700;
+          letter-spacing: 0.2px
+        }
+    
+        .controls {
+          display: flex;
+          gap: 8px;
+          align-items: center
+        }
+    
+        .search {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: rgba(255, 255, 255, 0.12);
+          padding: 6px;
+          border-radius: 10px;
+          backdrop-filter: blur(4px);
+        }
+    
+        .search input {
+          border: 0;
+          background: transparent;
+          color: white;
+          padding: 8px 6px;
+          outline: none;
+          width: 200px;
+          font-weight: 600;
+        }
+    
+        .header-btn {
+          background: transparent;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: white;
+          padding: 8px 10px;
+          border-radius: 10px;
+          font-weight: 700;
+          cursor: pointer
+        }
+    
+        .header-btn:hover {
+          transform: translateY(-2px)
+        }
+    </style>
 </head>
+
 <body>
     <header>
         <div style="display:flex;align-items:center;gap:12px">
-          <h1>Macronutrientes — App</h1>
-          <div id="hbActive" style="display:none">
-            <div style="display:flex;flex-direction:column;gap:4px">
-              <div class="hb-title">Objetivo: <span id="hbName" style="font-weight:800"></span></div>
-              <div style="display:flex;gap:8px;align-items:center">
-                <div style="font-size:12px;color:rgba(255,255,255,0.95)">TDEE</div>
-                <div style="font-weight:800" id="hbTdee"></div>
-              </div>
+            <h1>Macronutrientes — App</h1>
+            <div id="hbActive" style="display:none">
+                <div style="display:flex;flex-direction:column;gap:4px">
+                    <div class="hb-title">Objetivo: <span id="hbName" style="font-weight:800"></span></div>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <div style="font-size:12px;color:rgba(255,255,255,0.95)">TDEE</div>
+                        <div style="font-weight:800" id="hbTdee"></div>
+                    </div>
+                </div>
+                <div class="hb-progress">
+                    <div style="font-size:11px;margin-bottom:6px;color:rgba(255,255,255,0.95)">Progreso kcal</div>
+                    <div class="bar-mini">
+                        <div id="hbCalFill" class="fill-mini fill-cal" style="width:0%"></div>
+                    </div>
+                    <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+                        <div style="width:30px;font-size:11px">P</div>
+                        <div class="bar-mini" style="flex:1">
+                            <div id="hbPFill" class="fill-mini fill-p" style="width:0%"></div>
+                        </div>
+                        <div style="width:40px;text-align:right;font-size:11px" id="hbPText">0%</div>
+                    </div>
+                    <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+                        <div style="width:30px;font-size:11px">G</div>
+                        <div class="bar-mini" style="flex:1">
+                            <div id="hbFFill" class="fill-mini fill-f" style="width:0%"></div>
+                        </div>
+                        <div style="width:40px;text-align:right;font-size:11px" id="hbFText">0%</div>
+                    </div>
+                    <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+                        <div style="width:30px;font-size:11px">C</div>
+                        <div class="bar-mini" style="flex:1">
+                            <div id="hbCFill" class="fill-mini fill-c" style="width:0%"></div>
+                        </div>
+                        <div style="width:40px;text-align:right;font-size:11px" id="hbCText">0%</div>
+                    </div>
+                </div>
+                <button class="header-btn" style="padding:6px 8px" onclick="clearActiveHB()">✖</button>
             </div>
-            <div class="hb-progress">
-              <div style="font-size:11px;margin-bottom:6px;color:rgba(255,255,255,0.95)">Progreso kcal</div>
-              <div class="bar-mini"><div id="hbCalFill" class="fill-mini fill-cal" style="width:0%"></div></div>
-              <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-                <div style="width:30px;font-size:11px">P</div>
-                <div class="bar-mini" style="flex:1"><div id="hbPFill" class="fill-mini fill-p" style="width:0%"></div></div>
-                <div style="width:40px;text-align:right;font-size:11px" id="hbPText">0%</div>
-              </div>
-              <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-                <div style="width:30px;font-size:11px">G</div>
-                <div class="bar-mini" style="flex:1"><div id="hbFFill" class="fill-mini fill-f" style="width:0%"></div></div>
-                <div style="width:40px;text-align:right;font-size:11px" id="hbFText">0%</div>
-              </div>
-              <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-                <div style="width:30px;font-size:11px">C</div>
-                <div class="bar-mini" style="flex:1"><div id="hbCFill" class="fill-mini fill-c" style="width:0%"></div></div>
-                <div style="width:40px;text-align:right;font-size:11px" id="hbCText">0%</div>
-              </div>
-            </div>
-            <button class="header-btn" style="padding:6px 8px" onclick="clearActiveHB()">✖</button>
-          </div>
         </div>
-      
+
         <div class="controls">
-          <div class="search" title="Buscar alimento">
-            <input id="searchInput" placeholder="Buscar alimento..." />
-            <button class="header-btn" onclick="filterAlimentos()">🔎</button>
-          </div>
-          <button class="header-btn" onclick="exportCSV()">Exportar CSV</button>
-          <button class="header-btn" onclick="limpiarLista()">Limpiar</button>
+            <div class="search" title="Buscar alimento">
+                <input id="searchInput" placeholder="Buscar alimento..." />
+                <button class="header-btn" onclick="filterAlimentos()">🔎</button>
+            </div>
+            <button class="header-btn" onclick="exportCSV()">Exportar CSV</button>
+            <button class="header-btn" onclick="limpiarLista()">Limpiar</button>
         </div>
-      </header>
+    </header>
 </body>
+
 </html>
