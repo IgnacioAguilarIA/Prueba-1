@@ -14,6 +14,17 @@
     -moz-osx-font-smoothing:grayscale;
     padding-bottom:170px;
   }
+  
+  /* HEADER */
+  header{
+    position:sticky; top:0; z-index:120;
+    display:flex; align-items:center; gap:12px;
+    justify-content:space-between;
+    padding:12px 14px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    color:white;
+    box-shadow:0 8px 20px rgba(0,0,0,0.12);
+  }
 
     h1 {
       font-size: 4rem;
@@ -38,6 +49,49 @@
   </style>
 </head>
 <body>
+    <header>
+        <div style="display:flex;align-items:center;gap:12px">
+          <h1>Macronutrientes — App</h1>
+          <div id="hbActive" style="display:none">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div class="hb-title">Objetivo: <span id="hbName" style="font-weight:800"></span></div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <div style="font-size:12px;color:rgba(255,255,255,0.95)">TDEE</div>
+                <div style="font-weight:800" id="hbTdee"></div>
+              </div>
+            </div>
+            <div class="hb-progress">
+              <div style="font-size:11px;margin-bottom:6px;color:rgba(255,255,255,0.95)">Progreso kcal</div>
+              <div class="bar-mini"><div id="hbCalFill" class="fill-mini fill-cal" style="width:0%"></div></div>
+              <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+                <div style="width:30px;font-size:11px">P</div>
+                <div class="bar-mini" style="flex:1"><div id="hbPFill" class="fill-mini fill-p" style="width:0%"></div></div>
+                <div style="width:40px;text-align:right;font-size:11px" id="hbPText">0%</div>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+                <div style="width:30px;font-size:11px">G</div>
+                <div class="bar-mini" style="flex:1"><div id="hbFFill" class="fill-mini fill-f" style="width:0%"></div></div>
+                <div style="width:40px;text-align:right;font-size:11px" id="hbFText">0%</div>
+              </div>
+              <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+                <div style="width:30px;font-size:11px">C</div>
+                <div class="bar-mini" style="flex:1"><div id="hbCFill" class="fill-mini fill-c" style="width:0%"></div></div>
+                <div style="width:40px;text-align:right;font-size:11px" id="hbCText">0%</div>
+              </div>
+            </div>
+            <button class="header-btn" style="padding:6px 8px" onclick="clearActiveHB()">✖</button>
+          </div>
+        </div>
+      
+        <div class="controls">
+          <div class="search" title="Buscar alimento">
+            <input id="searchInput" placeholder="Buscar alimento..." />
+            <button class="header-btn" onclick="filterAlimentos()">🔎</button>
+          </div>
+          <button class="header-btn" onclick="exportCSV()">Exportar CSV</button>
+          <button class="header-btn" onclick="limpiarLista()">Limpiar</button>
+        </div>
+      </header>
   <h1>XD</h1>
   <p>XD</p>
 </body>
