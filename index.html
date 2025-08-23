@@ -492,81 +492,97 @@
 
 <body>
     <header>
-        <div style="display:flex;align-items:center;gap:12px">
-            <h1>Macronutrientes — App</h1>
-            <div id="hbActive" style="display:none">
-                <div style="display:flex;flex-direction:column;gap:4px">
-                    <div class="hb-title">Objetivo: <span id="hbName" style="font-weight:800"></span></div>
-                    <div style="display:flex;gap:8px;align-items:center">
-                        <div style="font-size:12px;color:rgba(255,255,255,0.95)">TDEE</div>
-                        <div style="font-weight:800" id="hbTdee"></div>
-                    </div>
-                </div>
-                <div class="hb-progress">
-                    <div style="font-size:11px;margin-bottom:6px;color:rgba(255,255,255,0.95)">Progreso kcal</div>
-                    <div class="bar-mini">
-                        <div id="hbCalFill" class="fill-mini fill-cal" style="width:0%"></div>
-                    </div>
-                    <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-                        <div style="width:30px;font-size:11px">P</div>
-                        <div class="bar-mini" style="flex:1">
-                            <div id="hbPFill" class="fill-mini fill-p" style="width:0%"></div>
-                        </div>
-                        <div style="width:40px;text-align:right;font-size:11px" id="hbPText">0%</div>
-                    </div>
-                    <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-                        <div style="width:30px;font-size:11px">G</div>
-                        <div class="bar-mini" style="flex:1">
-                            <div id="hbFFill" class="fill-mini fill-f" style="width:0%"></div>
-                        </div>
-                        <div style="width:40px;text-align:right;font-size:11px" id="hbFText">0%</div>
-                    </div>
-                    <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-                        <div style="width:30px;font-size:11px">C</div>
-                        <div class="bar-mini" style="flex:1">
-                            <div id="hbCFill" class="fill-mini fill-c" style="width:0%"></div>
-                        </div>
-                        <div style="width:40px;text-align:right;font-size:11px" id="hbCText">0%</div>
-                    </div>
-                </div>
-                <button class="header-btn" style="padding:6px 8px" onclick="clearActiveHB()">✖</button>
+      <div style="display:flex;align-items:center;gap:12px">
+        <h1>Macronutrientes — App</h1>
+        <div id="hbActive" style="display:none">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div class="hb-title">Objetivo: <span id="hbName" style="font-weight:800"></span></div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div style="font-size:12px;color:rgba(255,255,255,0.95)">TDEE</div>
+              <div style="font-weight:800" id="hbTdee"></div>
             </div>
-        </div>
-
-        <div class="controls">
-            <div class="search" title="Buscar alimento">
-                <input id="searchInput" placeholder="Buscar alimento..." />
-                <button class="header-btn" onclick="filterAlimentos()">🔎</button>
+          </div>
+          <div class="hb-progress">
+            <div style="font-size:11px;margin-bottom:6px;color:rgba(255,255,255,0.95)">Progreso kcal</div>
+            <div class="bar-mini">
+              <div id="hbCalFill" class="fill-mini fill-cal" style="width:0%"></div>
             </div>
-            <button class="header-btn" onclick="exportCSV()">Exportar CSV</button>
-            <button class="header-btn" onclick="limpiarLista()">Limpiar</button>
+            <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+              <div style="width:30px;font-size:11px">P</div>
+              <div class="bar-mini" style="flex:1">
+                <div id="hbPFill" class="fill-mini fill-p" style="width:0%"></div>
+              </div>
+              <div style="width:40px;text-align:right;font-size:11px" id="hbPText">0%</div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+              <div style="width:30px;font-size:11px">G</div>
+              <div class="bar-mini" style="flex:1">
+                <div id="hbFFill" class="fill-mini fill-f" style="width:0%"></div>
+              </div>
+              <div style="width:40px;text-align:right;font-size:11px" id="hbFText">0%</div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+              <div style="width:30px;font-size:11px">C</div>
+              <div class="bar-mini" style="flex:1">
+                <div id="hbCFill" class="fill-mini fill-c" style="width:0%"></div>
+              </div>
+              <div style="width:40px;text-align:right;font-size:11px" id="hbCText">0%</div>
+            </div>
+          </div>
+          <button class="header-btn" style="padding:6px 8px" onclick="clearActiveHB()">✖</button>
         </div>
+      </div>
+  
+      <div class="controls">
+        <div class="search" title="Buscar alimento">
+          <input id="searchInput" placeholder="Buscar alimento..." />
+          <button class="header-btn" onclick="filterAlimentos()">🔎</button>
+        </div>
+        <button class="header-btn" onclick="exportCSV()">Exportar CSV</button>
+        <button class="header-btn" onclick="limpiarLista()">Limpiar</button>
+      </div>
     </header>
-
+  
     <div class="container" id="container"></div>
-
+  
     <!-- Panel flotante (calculadora / descripciones / HB) -->
     <div id="infoFlotante" role="dialog" aria-hidden="true"></div>
-
+  
     <!-- Lista seleccionada -->
     <div id="listaSeleccion">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-            <h3>Lista de alimentos seleccionados</h3>
-            <div class="small">Toca ❌ para borrar • ✏️ editar</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3>Lista de alimentos seleccionados</h3>
+        <div class="small">Toca ❌ para borrar • ✏️ editar</div>
+      </div>
+      <ul id="alimentosSeleccionados"></ul>
+  
+      <div style="display:flex;gap:12px;margin-top:10px;align-items:center;justify-content:space-between">
+        <div>
+          <div class="small">Totales</div>
+          <div><b>Proteínas:</b> <span id="totalProteinas">0</span> g — <b>Grasas:</b> <span id="totalGrasas">0</span> g —
+            <b>Carbs:</b> <span id="totalCarbs">0</span> g
+          </div>
         </div>
-        <ul id="alimentosSeleccionados"></ul>
-
-        <div style="display:flex;gap:12px;margin-top:10px;align-items:center;justify-content:space-between">
-            <div>
-                <div class="small">Totales</div>
-                <div><b>Proteínas:</b> <span id="totalProteinas">0</span> g — <b>Grasas:</b> <span
-                        id="totalGrasas">0</span> g —
-                    <b>Carbs:</b> <span id="totalCarbs">0</span> g
-                </div>
-            </div>
-            <div><b>Calorías:</b> <span id="totalCalorias">0</span> kcal</div>
-        </div>
+        <div><b>Calorías:</b> <span id="totalCalorias">0</span> kcal</div>
+      </div>
     </div>
+  
+    <div class="notes">
+      <strong>Notas:</strong>
+      <ul>
+        <li>Valores aproximados por 100 g de la porción comestible (si no se indica lo contrario).</li>
+        <li>Elige la versión cruda o cocida según necesites (ej. arroz crudo vs cocido).</li>
+        <li>Las descripciones son breves; pulsa "Mostrar descripción" en la calculadora para leerla.</li>
+      </ul>
+    </div>
+  
+    <footer class="appbar">
+      <div class="bar">
+        <button onclick="focusSearch()">Buscar</button>
+        <button class="muted" onclick="toggleAllSections()">Abrir/Cerrar secciones</button>
+        <button onclick="downloadJSON()">Guardar / Descargar</button>
+      </div>
+    </footer>
 </body>
 
 </html>
