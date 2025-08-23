@@ -7,88 +7,88 @@
     <title>PUTAAAAAAAAAAAAAAAAAAAAAAAA</title>
     <style>
         :root {
-          --bg: #fff7f0;
-          --accent: #ff7f34;
-          --accent-2: #ffb26b;
-          --muted: #463834;
-          --card: #fff8f2;
-          --panel: #fff3e6;
+            --bg: #fff7f0;
+            --accent: #ff7f34;
+            --accent-2: #ffb26b;
+            --muted: #463834;
+            --card: #fff8f2;
+            --panel: #fff3e6;
         }
-    
+
         * {
-          box-sizing: border-box
+            box-sizing: border-box
         }
-    
+
         body {
-          margin: 0;
-          font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-          background: linear-gradient(180deg, #fffdfc 0%, var(--bg) 100%);
-          color: var(--muted);
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          padding-bottom: 170px;
+            margin: 0;
+            font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+            background: linear-gradient(180deg, #fffdfc 0%, var(--bg) 100%);
+            color: var(--muted);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            padding-bottom: 170px;
         }
-    
+
         /* HEADER */
         header {
-          position: sticky;
-          top: 0;
-          z-index: 120;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          justify-content: space-between;
-          padding: 12px 14px;
-          background: linear-gradient(90deg, var(--accent), var(--accent-2));
-          color: white;
-          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            position: sticky;
+            top: 0;
+            z-index: 120;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            color: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
         }
-    
+
         header h1 {
-          font-size: 18px;
-          margin: 0;
-          font-weight: 700;
-          letter-spacing: 0.2px
+            font-size: 18px;
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 0.2px
         }
-    
+
         .controls {
-          display: flex;
-          gap: 8px;
-          align-items: center
+            display: flex;
+            gap: 8px;
+            align-items: center
         }
-    
+
         .search {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: rgba(255, 255, 255, 0.12);
-          padding: 6px;
-          border-radius: 10px;
-          backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.12);
+            padding: 6px;
+            border-radius: 10px;
+            backdrop-filter: blur(4px);
         }
-    
+
         .search input {
-          border: 0;
-          background: transparent;
-          color: white;
-          padding: 8px 6px;
-          outline: none;
-          width: 200px;
-          font-weight: 600;
+            border: 0;
+            background: transparent;
+            color: white;
+            padding: 8px 6px;
+            outline: none;
+            width: 200px;
+            font-weight: 600;
         }
-    
+
         .header-btn {
-          background: transparent;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          color: white;
-          padding: 8px 10px;
-          border-radius: 10px;
-          font-weight: 700;
-          cursor: pointer
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer
         }
-    
+
         .header-btn:hover {
-          transform: translateY(-2px)
+            transform: translateY(-2px)
         }
     </style>
 </head>
@@ -145,6 +145,31 @@
             <button class="header-btn" onclick="limpiarLista()">Limpiar</button>
         </div>
     </header>
+
+    <div class="container" id="container"></div>
+
+    <!-- Panel flotante (calculadora / descripciones / HB) -->
+    <div id="infoFlotante" role="dialog" aria-hidden="true"></div>
+
+    <!-- Lista seleccionada -->
+    <div id="listaSeleccion">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3>Lista de alimentos seleccionados</h3>
+            <div class="small">Toca ❌ para borrar • ✏️ editar</div>
+        </div>
+        <ul id="alimentosSeleccionados"></ul>
+
+        <div style="display:flex;gap:12px;margin-top:10px;align-items:center;justify-content:space-between">
+            <div>
+                <div class="small">Totales</div>
+                <div><b>Proteínas:</b> <span id="totalProteinas">0</span> g — <b>Grasas:</b> <span
+                        id="totalGrasas">0</span> g —
+                    <b>Carbs:</b> <span id="totalCarbs">0</span> g
+                </div>
+            </div>
+            <div><b>Calorías:</b> <span id="totalCalorias">0</span> kcal</div>
+        </div>
+    </div>
 </body>
 
 </html>
