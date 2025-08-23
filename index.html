@@ -643,6 +643,571 @@
                 container.appendChild(sec);
             });
         }
+
+        /* Selection helper */
+        function selectThenOpen(el) {
+            const previously = document.querySelector('.alimento.selected');
+            if (previously && previously !== el) previously.classList.remove('selected');
+            if (el.classList.contains('selected')) openCalcFromDataset(el);
+            else { document.querySelectorAll('.alimento').forEach(x => x.classList.remove('selected')); el.classList.add('selected'); el.style.boxShadow = '0 18px 36px rgba(0,0,0,0.14)'; setTimeout(() => { el.style.boxShadow = ''; }, 700); }
+        }
+
+        /* Toggle seccion */
+        function toggleSeccion(id) {
+            const cont = document.getElementById(id);
+            if (!cont) return;
+            cont.classList.toggle('open');
+            const chev = cont.querySelector('.chev');
+            if (cont.classList.contains('open')) chev.style.transform = 'rotate(90deg)'; else chev.style.transform = 'rotate(0deg)';
+            cerrarInfo();
+        }
+
+        /* Búsqueda */
+        function normalizeText(str) { if (!str) return ''; return str.toString().toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, ''); }
+        document.getElementById('searchInput').addEventListener('input', filterAlimentos);
+        function filterAlimentos() {
+            const q = normalizeText(document.getElementById('searchInput').value || '');
+            const secs = document.querySelectorAll('.seccion');
+            let any = false;
+            secs.forEach(sec => {
+                const alimentos = sec.querySelectorAll('.alimento');
+                let secHas = false;
+                alimentos.forEach(a => {
+                    const text = normalizeText(a.dataset.name + ' ' + a.dataset.desc);
+                    if (q === '' || text.includes(q)) { a.style.display = 'flex'; secHas = true; any = true; } else { a.style.display = 'none'; }
+                });
+                if (q !== '') { if (secHas) sec.classList.add('open'); else sec.classList.remove('open'); }
+            });
+            const existing = container.querySelector('.no-results');
+            if (!any && q !== '') { if (!existing) { const no = document.createElement('div'); no.className = 'no-results'; no.textContent = 'No se encontraron alimentos.'; container.insertBefore(no, container.firstChild); } }
+            else if (existing) existing.remove();
+        }
+
+        /* Open calc from dataset */
+        function getFoodByName(name) { return foods.find(f => f.name === name) || null; }
+
+        function openCalcFromDataset(el) {
+            const nombre = el.dataset.name;
+            if (ultimaSeleccion === nombre) { cerrarInfo(); return; }
+            ultimaSeleccion = nombre; editIndex = null;
+            const foodObj = getFoodByName(nombre);
+            const protBase = foodObj ? foodObj.prot : parseFloat(el.dataset.prot) || 0;
+            const grasBase = foodObj ? foodObj.gras : parseFloat(el.dataset.gras) || 0;
+            const carbBase = foodObj ? foodObj.carb : parseFloat(el.dataset.carb) || 0;
+            const calBase = foodObj ? foodObj.cal : parseFloat(el.dataset.cal) || 0;
+            const pesoBase = foodObj ? foodObj.pesoBase : parseFloat(el.dataset.pesobase) || 100;
+            const desc = foodObj ? foodObj.desc : (el.dataset.desc || '');
+            openCalc(nombre, pesoBase, protBase, grasBase, carbBase, calBase, desc, foodObj);
+        }
+
+        /* Open calc */
+        function openCalc(nombre, pesoBase, protBase, grasBase, carbBase, calBase, desc = '', foodObj = null) {
+            const f = document.getElementById('infoFlotante');
+            ultimaSeleccion = nombre; editIndex = null;
+            f.classList.remove('fullscreen'); f.style.display = 'block'; f.setAttribute('aria-hidden', 'false');
+
+            const toolbarHtml = `<div id="infoToolbar">
+          <button class="secondary" title="Expandir" onclick="toggleInfoFullscreen()">⤢</button>
+          <button class="cerrar" title="Cerrar" onclick="cerrarInfo()">✖</button>
+        </div>`;
+
+            const tableHtml = `
+        <table>
+          <tr><td>Proteínas</td><td id="tProt">${protBase} g (x100g)</td></tr>
+          <tr><td>Grasas</td><td id="tGras">${grasBase} g (x100g)</td></tr>
+          <tr><td>Carbohidratos</td><td id="tCarb">${carbBase} g (x100g)</td></tr>
+          <tr><td>Calorías</td><td id="tCal">${calBase} kcal (x100g)</td></tr>
+        </table>`;
+
+            const simpleDesc = escapeHtml(desc || 'Sin descripción.');
+
+            f.innerHTML = toolbarHtml + `
+        <h3>${escapeHtml(nombre)}</h3>
+        <label>Peso (g)</label>
+        <input id="pesoAlimento" type="number" value="${pesoBase}" min="1">
+        ${tableHtml}
+        <div class="actions">
+          <button id="btnDesc" class="secondary">Mostrar descripción</button>
+          <div style="flex:1"></div>
+          <button class="primary" onclick="agregarAlimentoDesdeCalc('${escapeJs(nombre)}', ${protBase}, ${grasBase}, ${carbBase}, ${calBase})">Agregar</button>
+        </div>
+        <div id="descBox" style="display:none;margin-top:12px;padding:10px;border-radius:8px;background:linear-gradient(180deg,#fff,#fffaf5);border:1px solid rgba(0,0,0,0.03)">
+          <div style="font-size:14px"><strong>Descripción breve:</strong></div>
+          <div style="margin-top:8px;color:#5f463f">${simpleDesc}</div>
+        </div>
+      `;
+
+            const pesoInput = document.getElementById('pesoAlimento');
+            pesoInput.addEventListener('input', () => {
+                const peso = parseFloat(pesoInput.value) || pesoBase;
+                const factor = peso / 100;
+                document.getElementById('tProt').innerText = (protBase * factor).toFixed(1) + ' g';
+                document.getElementById('tGras').innerText = (grasBase * factor).toFixed(1) + ' g';
+                document.getElementById('tCarb').innerText = (carbBase * factor).toFixed(1) + ' g';
+                document.getElementById('tCal').innerText = (calBase * factor).toFixed(1) + ' kcal';
+            });
+
+            document.getElementById('btnDesc').addEventListener('click', () => {
+                const box = document.getElementById('descBox');
+                if (box.style.display === 'none') { box.style.display = 'block'; document.getElementById('btnDesc').innerText = 'Ocultar descripción'; }
+                else { box.style.display = 'none'; document.getElementById('btnDesc').innerText = 'Mostrar descripción'; }
+            });
+        }
+
+        /* Añadir desde calculadora */
+        function agregarAlimentoDesdeCalc(nombre, protBase, grasBase, carbBase, calBase) {
+            const peso = parseFloat(document.getElementById('pesoAlimento').value) || 100;
+            const factor = peso / 100;
+            const prot = Math.round(protBase * factor * 10) / 10;
+            const gras = Math.round(grasBase * factor * 10) / 10;
+            const carb = Math.round(carbBase * factor * 10) / 10;
+            const cal = Math.round(calBase * factor * 10) / 10;
+            lista.push({ nombre, peso, prot, gras, carb, cal, source: 'preloaded' });
+            localStorage.setItem('miListaMacro', JSON.stringify(lista));
+            actualizarListaUI(); cerrarInfo();
+        }
+
+        /* Manual */
+        function abrirManual() {
+            if (ultimaSeleccion === 'manual') { cerrarInfo(); return; }
+            ultimaSeleccion = 'manual'; const f = document.getElementById('infoFlotante');
+            f.classList.remove('fullscreen'); f.style.display = 'block'; f.setAttribute('aria-hidden', 'false');
+
+            const toolbarHtml = `<div id="infoToolbar">
+          <button class="secondary" title="Expandir" onclick="toggleInfoFullscreen()">⤢</button>
+          <button class="cerrar" title="Cerrar" onclick="cerrarInfo()">✖</button>
+        </div>`;
+
+            f.innerHTML = toolbarHtml + `<h3>Agregar manualmente</h3>
+        <label>Nombre</label><input id="nombreManual" type="text" placeholder="Nombre">
+        <label>Peso (g)</label><input id="pesoManual" type="number" value="100" min="1">
+        <label>Proteínas (g por 100g)</label><input id="proteinasManual" type="number" placeholder="ej: 12">
+        <label>Grasas (g por 100g)</label><input id="grasasManual" type="number" placeholder="ej: 10">
+        <label>Carbs (g por 100g)</label><input id="carbsManual" type="number" placeholder="ej: 5">
+        <label>Calorías (kcal por 100g)</label><input id="caloriasManual" type="number" placeholder="ej: 150">
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="primary" onclick="agregarAlimentoManual()">Agregar</button>
+          <button class="secondary" onclick="cerrarInfo()">Cancelar</button>
+        </div>`;
+        }
+
+        function agregarAlimentoManual() {
+            const nombre = document.getElementById('nombreManual').value.trim();
+            const peso = parseFloat(document.getElementById('pesoManual').value) || 100;
+            const prot100 = parseFloat(document.getElementById('proteinasManual').value) || 0;
+            const gras100 = parseFloat(document.getElementById('grasasManual').value) || 0;
+            const carb100 = parseFloat(document.getElementById('carbsManual').value) || 0;
+            const cal100 = parseFloat(document.getElementById('caloriasManual').value) || 0;
+            if (!nombre) return alert('Ingrese el nombre del alimento');
+            const prot = Math.round(prot100 / 100 * peso * 10) / 10;
+            const gras = Math.round(gras100 / 100 * peso * 10) / 10;
+            const carb = Math.round(carb100 / 100 * peso * 10) / 10;
+            const cal = Math.round(cal100 / 100 * peso * 10) / 10;
+            lista.push({ nombre, peso, prot, gras, carb, cal, source: 'manual' });
+            localStorage.setItem('miListaMacro', JSON.stringify(lista));
+            actualizarListaUI(); cerrarInfo();
+        }
+
+        /* Harris-Benedict (igual que antes) */
+        function abrirHB() {
+            if (ultimaSeleccion === 'harris') { cerrarInfo(); return; }
+            ultimaSeleccion = 'harris';
+            const f = document.getElementById('infoFlotante'); f.classList.remove('fullscreen'); f.style.display = 'block'; f.setAttribute('aria-hidden', 'false');
+
+            const toolbarHtml = `<div id="infoToolbar">
+          <button class="secondary" title="Expandir" onclick="toggleInfoFullscreen()">⤢</button>
+          <button class="cerrar" title="Cerrar" onclick="cerrarInfo()">✖</button>
+        </div>`;
+
+            f.innerHTML = toolbarHtml + `<h3>Calculadora Harris-Benedict</h3>
+        <label>Sexo</label>
+        <select id="hbSex"><option value="male">Hombre</option><option value="female">Mujer</option></select>
+        <label>Edad (años)</label><input id="hbAge" type="number" value="30" min="1">
+        <label>Peso (kg)</label><input id="hbWeight" type="number" value="70" min="1">
+        <label>Altura (cm)</label><input id="hbHeight" type="number" value="175" min="1">
+        <label>Nivel de actividad</label>
+        <select id="hbActivity">
+          <option value="1.2">Sedentario (poca o ninguna actividad)</option>
+          <option value="1.375">Ligera (1-3 días/sem)</option>
+          <option value="1.55">Moderada (3-5 días/sem)</option>
+          <option value="1.725">Activa (6-7 días/sem)</option>
+          <option value="1.9">Muy activa (trabajo físico intenso o doble entrenamiento)</option>
+        </select>
+    
+        <label>Presets de split</label>
+        <select id="hbSplitPreset">
+          <option value="30,30,40">Equilibrado — 30% P / 30% G / 40% C</option>
+          <option value="35,35,30">Hipertrofia — 35% P / 35% G / 30% C</option>
+          <option value="40,30,30">Alto en proteína — 40% P / 30% G / 30% C</option>
+          <option value="30,45,25">Bajo en carbs — 30% P / 45% G / 25% C</option>
+          <option value="25,70,5">Cetogénico — 25% P / 70% G / 5% C</option>
+          <option value="20,20,60">Alto en carbs — 20% P / 20% G / 60% C</option>
+          <option value="custom">Personalizado...</option>
+        </select>
+    
+        <div id="customSplitPanel" style="display:none;margin-top:8px">
+          <label>Split personalizado (sumar 100%)</label>
+          <div style="display:flex;gap:6px">
+            <input id="customP" type="number" placeholder="% Proteína" min="0" max="100">
+            <input id="customF" type="number" placeholder="% Grasas" min="0" max="100">
+            <input id="customC" type="number" placeholder="% Carbs" min="0" max="100">
+          </div>
+          <div style="font-size:12px;color:#6b5246;margin-top:4px">Si ingresas estos valores, se usarán en vez del preset.</div>
+        </div>
+    
+        <label>Opcional: proteína objetivo (g/kg) — deja en blanco para usar %</label>
+        <input id="hbProtPerKg" type="number" placeholder="ej: 1.6" min="0" step="0.1">
+    
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="primary" onclick="calcularHB()">Calcular</button>
+          <button class="secondary" onclick="cerrarInfo()">Cerrar</button>
+        </div>
+    
+        <div id="hbResult" style="margin-top:12px;display:none"></div>
+        <div id="hbSaved" style="margin-top:10px;display:none"></div>
+      `;
+
+            document.getElementById('hbSplitPreset').addEventListener('change', (e) => {
+                const v = e.target.value;
+                const panel = document.getElementById('customSplitPanel');
+                if (v === 'custom') panel.style.display = 'block'; else panel.style.display = 'none';
+            });
+
+            if (hbActiveId) mostrarMetasGuardadas();
+        }
+
+        function calcularHB() {
+            const sex = document.getElementById('hbSex').value;
+            const age = parseFloat(document.getElementById('hbAge').value) || 0;
+            const weight = parseFloat(document.getElementById('hbWeight').value) || 0;
+            const height = parseFloat(document.getElementById('hbHeight').value) || 0;
+            const activity = parseFloat(document.getElementById('hbActivity').value) || 1.2;
+            let pPct, fPct, cPct;
+            const preset = document.getElementById('hbSplitPreset').value;
+            if (preset === 'custom') {
+                const cp = parseFloat(document.getElementById('customP').value) || 0;
+                const cf = parseFloat(document.getElementById('customF').value) || 0;
+                const cc = parseFloat(document.getElementById('customC').value) || 0;
+                const sum = cp + cf + cc;
+                if (sum !== 100) { return alert('El split personalizado debe sumar 100% (actual: ' + sum + '%)'); }
+                pPct = cp / 100; fPct = cf / 100; cPct = cc / 100;
+            } else {
+                [pPct, fPct, cPct] = preset.split(',').map(s => parseFloat(s) / 100);
+            }
+
+            const protPerKg = parseFloat(document.getElementById('hbProtPerKg').value);
+            if (!age || !weight || !height) { return alert('Completa edad, peso y altura'); }
+
+            let bmr;
+            if (sex === 'male') bmr = 66.5 + (13.75 * weight) + (5.003 * height) - (6.755 * age);
+            else bmr = 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
+            const tdee = Math.round(bmr * activity);
+
+            let protGrams, fatGrams, carbGrams;
+            const calories = tdee;
+            if (!isNaN(protPerKg) && protPerKg > 0) {
+                protGrams = Math.round(protPerKg * weight * 10) / 10;
+                const protCal = protGrams * 4;
+                const remainingCal = Math.max(0, calories - protCal);
+                const ratio = (fPct + cPct) > 0 ? (fPct / (fPct + cPct)) : 0.5;
+                const fatCal = Math.round(remainingCal * ratio);
+                const carbCal = Math.round(remainingCal - fatCal);
+                fatGrams = Math.round((fatCal / 9) * 10) / 10;
+                carbGrams = Math.round((carbCal / 4) * 10) / 10;
+            } else {
+                const protCal = Math.round(calories * pPct);
+                const fatCal = Math.round(calories * fPct);
+                const carbCal = Math.round(calories * cPct);
+                protGrams = Math.round((protCal / 4) * 10) / 10;
+                fatGrams = Math.round((fatCal / 9) * 10) / 10;
+                carbGrams = Math.round((carbCal / 4) * 10) / 10;
+            }
+
+            const hbResult = document.getElementById('hbResult');
+            hbResult.style.display = 'block';
+            const pC = Math.round((protGrams * 4) / calories * 100);
+            const fC = Math.round((fatGrams * 9) / calories * 100);
+            const cC = Math.round((carbGrams * 4) / calories * 100);
+
+            const barsHtml = `
+        <div style="padding:10px;border-radius:8px;background:#fff8f2;border:1px solid rgba(0,0,0,0.03)">
+          <div><b>BMR:</b> ${bmr.toFixed(0)} kcal/día</div>
+          <div style="margin-top:6px"><b>TDEE:</b> ${tdee} kcal/día</div>
+          <div style="margin-top:8px"><b>Macros:</b> P ${protGrams} g • G ${fatGrams} g • C ${carbGrams} g</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="primary" onclick="copiarHB(${bmr.toFixed(0)},${tdee},'${protGrams}','${fatGrams}','${carbGrams}')">Copiar</button>
+            <button class="secondary" onclick="guardarMetaHB(${bmr.toFixed(0)},${tdee},${protGrams},${fatGrams},${carbGrams})">Guardar metas</button>
+            <button class="secondary" onclick="mostrarMetasGuardadas()">Ver metas guardadas</button>
+          </div>
+        </div>
+      `;
+
+            hbResult.innerHTML = barsHtml;
+        }
+
+        /* Copiar, guardar, mostrar metas (igual que antes) */
+        function copiarHB(bmr, tdee, prot, gras, carb) {
+            const text = `BMR: ${bmr} kcal\nTDEE: ${tdee} kcal\nProteínas: ${prot} g\nGrasas: ${gras} g\nCarbohidratos: ${carb} g`;
+            navigator.clipboard?.writeText(text).then(() => alert('Resultados copiados al portapapeles'), () => alert('No se pudo copiar'));
+        }
+        function guardarMetaHB(bmr, tdee, prot, gras, carb) {
+            const name = prompt('Nombre para guardar estas metas (ej: "Mantenimiento - Febrero")', 'Mis metas');
+            if (!name) return;
+            const obj = { id: Date.now(), name, bmr, tdee, prot, gras, carb, created: new Date().toISOString() };
+            hbGoals.push(obj);
+            localStorage.setItem('hbGoals', JSON.stringify(hbGoals));
+            alert('Metas guardadas');
+            mostrarMetasGuardadas();
+        }
+        function mostrarMetasGuardadas() {
+            const f = document.getElementById('infoFlotante'); const panel = document.getElementById('hbSaved'); panel.style.display = 'block';
+            if (hbGoals.length === 0) { panel.innerHTML = '<div style="margin-top:8px;color:#6b5246">No hay metas guardadas.</div>'; return; }
+            const html = hbGoals.map(g => {
+                return `<div style="padding:8px;margin-top:8px;border-radius:8px;background:#fff8f2;border:1px solid rgba(0,0,0,0.03)">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <b>${escapeHtml(g.name)}</b>
+              <div style="font-size:12px;color:#6b5246">${new Date(g.created).toLocaleString()}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;gap:6px">
+                <button class="primary" onclick="applyMeta(${g.id})">Copiar</button>
+                <button class="secondary" onclick="setActiveMeta(${g.id})">${hbActiveId === g.id ? 'Activo' : 'Establecer objetivo'}</button>
+              </div>
+              <button class="secondary" onclick="eliminarMeta(${g.id})">Eliminar</button>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:13px">TDEE ${g.tdee} kcal — P ${g.prot} g • G ${g.gras} g • C ${g.carb} g</div>
+        </div>`;
+            }).join('');
+            panel.innerHTML = html;
+        }
+        function setActiveMeta(id) {
+            const g = hbGoals.find(x => x.id === id);
+            if (!g) return alert('Meta no encontrada');
+            hbActiveId = id;
+            localStorage.setItem('hbActiveId', String(id));
+            updateHeaderActiveMeta();
+            alert('Meta establecida como objetivo actual: ' + g.name);
+            mostrarMetasGuardadas();
+        }
+        function clearActiveHB() {
+            if (!hbActiveId) return;
+            if (!confirm('Quitar objetivo actual?')) return;
+            hbActiveId = null;
+            localStorage.removeItem('hbActiveId');
+            updateHeaderActiveMeta();
+        }
+        function applyMeta(id) {
+            const g = hbGoals.find(x => x.id === id);
+            if (!g) return alert('Meta no encontrada');
+            const txt = `Meta: ${g.name}\nTDEE: ${g.tdee} kcal\nP: ${g.prot} g\nG: ${g.gras} g\nC: ${g.carb} g`;
+            navigator.clipboard?.writeText(txt).then(() => alert('Meta copiada al portapapeles. Pégala donde la necesites.'), () => alert('No se pudo copiar'));
+        }
+        function eliminarMeta(id) {
+            if (!confirm('Eliminar meta?')) return;
+            hbGoals = hbGoals.filter(x => x.id !== id);
+            localStorage.setItem('hbGoals', JSON.stringify(hbGoals));
+            if (hbActiveId === id) { hbActiveId = null; localStorage.removeItem('hbActiveId'); updateHeaderActiveMeta(); }
+            mostrarMetasGuardadas();
+        }
+
+        /* Update header widget and progress bars */
+        function updateHeaderActiveMeta() {
+            const el = document.getElementById('hbActive');
+            if (!hbActiveId) { el.style.display = 'none'; updateHeaderProgress(); return; }
+            const g = hbGoals.find(x => x.id === hbActiveId);
+            if (!g) { el.style.display = 'none'; hbActiveId = null; localStorage.removeItem('hbActiveId'); return; }
+            el.style.display = 'flex';
+            document.getElementById('hbName').innerText = g.name;
+            document.getElementById('hbTdee').innerText = g.tdee + ' kcal';
+            updateHeaderProgress();
+        }
+
+        /* Compute totals and update header progress bars */
+        function computeTotals() {
+            let totalProt = 0, totalGras = 0, totalCarb = 0, totalCal = 0;
+            lista.forEach(it => {
+                totalProt += (parseFloat(it.prot) || 0);
+                totalGras += (parseFloat(it.gras) || 0);
+                totalCarb += (parseFloat(it.carb) || 0);
+                totalCal += (parseFloat(it.cal) || 0);
+            });
+            return { totalProt, totalGras, totalCarb, totalCal };
+        }
+
+        function updateHeaderProgress() {
+            const totals = computeTotals();
+            const totalProt = totals.totalProt, totalGras = totals.totalGras, totalCarb = totals.totalCarb, totalCal = totals.totalCal;
+            document.getElementById('totalProteinas').innerText = totalProt.toFixed(1);
+            document.getElementById('totalGrasas').innerText = totalGras.toFixed(1);
+            document.getElementById('totalCarbs').innerText = totalCarb.toFixed(1);
+            document.getElementById('totalCalorias').innerText = totalCal.toFixed(1);
+
+            const el = document.getElementById('hbActive');
+            if (!hbActiveId) { // hide fills
+                document.getElementById('hbCalFill').style.width = '0%';
+                document.getElementById('hbPFill').style.width = '0%';
+                document.getElementById('hbFFill').style.width = '0%';
+                document.getElementById('hbCFill').style.width = '0%';
+                document.getElementById('hbPText').innerText = '0%';
+                document.getElementById('hbFText').innerText = '0%';
+                document.getElementById('hbCText').innerText = '0%';
+                return;
+            }
+            const g = hbGoals.find(x => x.id === hbActiveId);
+            if (!g) return;
+
+            // percentages
+            const calPct = Math.min(100, Math.round((totalCal / (g.tdee || 1)) * 100));
+            // for macros, safe fallback if targets are zero -> show 0
+            const protTarget = g.prot || 0;
+            const fatTarget = g.gras || 0;
+            const carbTarget = g.carb || 0;
+            const pPct = protTarget ? Math.min(100, Math.round((totalProt / protTarget) * 100)) : 0;
+            const fPct = fatTarget ? Math.min(100, Math.round((totalGras / fatTarget) * 100)) : 0;
+            const cPct = carbTarget ? Math.min(100, Math.round((totalCarb / carbTarget) * 100)) : 0;
+
+            // animate fills
+            document.getElementById('hbCalFill').style.width = calPct + '%';
+            document.getElementById('hbPFill').style.width = pPct + '%';
+            document.getElementById('hbFFill').style.width = fPct + '%';
+            document.getElementById('hbCFill').style.width = cPct + '%';
+            document.getElementById('hbPText').innerText = pPct + '%';
+            document.getElementById('hbFText').innerText = fPct + '%';
+            document.getElementById('hbCText').innerText = cPct + '%';
+        }
+
+        /* Lista UI */
+        function actualizarListaUI() {
+            const ul = document.getElementById('alimentosSeleccionados'); ul.innerHTML = '';
+            let totalProt = 0, totalGras = 0, totalCarb = 0, totalCal = 0;
+            lista.forEach((it, idx) => {
+                totalProt += it.prot; totalGras += it.gras; totalCarb += it.carb; totalCal += it.cal;
+                const li = document.createElement('li');
+                const left = document.createElement('div');
+                left.innerHTML = `<div style="font-weight:700">${escapeHtml(it.nombre)}</div>
+                          <div class="small"> ${it.peso} g • ${it.prot.toFixed(1)} g P • ${it.gras.toFixed(1)} g G • ${it.carb.toFixed(1)} g C</div>
+                          <div class="small">Fuente: ${it.source || 'manual'}</div>`;
+                const right = document.createElement('div'); right.className = 'meta-right';
+                right.innerHTML = `<div class="mini">${it.cal.toFixed(1)} kcal</div>
+          <div style="display:flex;gap:6px;margin-top:6px">
+            <button class="secondary" onclick="editItem(${idx})">✏️</button>
+            <button class="secondary" onclick="eliminarAlimento(${idx})">❌</button>
+          </div>`;
+                li.appendChild(left); li.appendChild(right);
+                ul.appendChild(li);
+            });
+            document.getElementById('totalProteinas').innerText = totalProt.toFixed(1);
+            document.getElementById('totalGrasas').innerText = totalGras.toFixed(1);
+            document.getElementById('totalCarbs').innerText = totalCarb.toFixed(1);
+            document.getElementById('totalCalorias').innerText = totalCal.toFixed(1);
+
+            // Also update header progress fills
+            updateHeaderProgress();
+        }
+
+        /* Edición, eliminar, export etc. (igual que antes) */
+        function eliminarAlimento(i) { if (!confirm('Eliminar elemento?')) return; lista.splice(i, 1); localStorage.setItem('miListaMacro', JSON.stringify(lista)); actualizarListaUI(); }
+        function editItem(i) {
+            const it = lista[i]; if (!it) return;
+            ultimaSeleccion = 'editar'; editIndex = i;
+            const f = document.getElementById('infoFlotante'); f.classList.remove('fullscreen'); f.style.display = 'block'; f.setAttribute('aria-hidden', 'false');
+
+            const toolbarHtml = `<div id="infoToolbar">
+          <button class="secondary" title="Expandir" onclick="toggleInfoFullscreen()">⤢</button>
+          <button class="cerrar" title="Cerrar" onclick="cerrarInfo()">✖</button>
+        </div>`;
+
+            if (it.source === 'manual') {
+                f.innerHTML = toolbarHtml + `<h3>Editar (manual): ${escapeHtml(it.nombre)}</h3>
+          <label>Peso (g)</label><input id="editPeso" type="number" value="${it.peso}" min="1">
+          <label>Proteínas (g)</label><input id="editProt" type="number" value="${it.prot}">
+          <label>Grasas (g)</label><input id="editGras" type="number" value="${it.gras}">
+          <label>Carbs (g)</label><input id="editCarb" type="number" value="${it.carb}">
+          <label>Calorías (kcal)</label><input id="editCal" type="number" value="${it.cal}">
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="primary" onclick="saveEdit(${i})">Guardar</button>
+            <button class="secondary" onclick="cerrarInfo()">Cancelar</button>
+          </div>`;
+            } else {
+                f.innerHTML = toolbarHtml + `<h3>Editar (pre-cargado): ${escapeHtml(it.nombre)}</h3>
+          <div class="small" style="margin-bottom:8px">Macros pre-cargados (no editables). Para cambiarlos, convertí a manual.</div>
+          <label>Peso (g)</label><input id="editPeso" type="number" value="${it.peso}" min="1">
+          <table>
+            <tr><td>Proteínas</td><td>${it.prot.toFixed(1)} g</td></tr>
+            <tr><td>Grasas</td><td>${it.gras.toFixed(1)} g</td></tr>
+            <tr><td>Carbs</td><td>${it.carb.toFixed(1)} g</td></tr>
+            <tr><td>Calorías</td><td>${it.cal.toFixed(1)} kcal</td></tr>
+          </table>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="primary" onclick="saveEditPreloaded(${i})">Guardar peso</button>
+            <button class="secondary" onclick="convertToManual(${i})">Convertir a manual</button>
+          </div>`;
+            }
+        }
+        function saveEdit(i) {
+            const peso = parseFloat(document.getElementById('editPeso').value) || 0;
+            const prot = parseFloat(document.getElementById('editProt').value) || 0;
+            const gras = parseFloat(document.getElementById('editGras').value) || 0;
+            const carb = parseFloat(document.getElementById('editCarb').value) || 0;
+            const cal = parseFloat(document.getElementById('editCal').value) || 0;
+            lista[i] = { nombre: lista[i].nombre, peso, prot, gras, carb, cal, source: 'manual' };
+            localStorage.setItem('miListaMacro', JSON.stringify(lista));
+            actualizarListaUI(); cerrarInfo();
+        }
+        function saveEditPreloaded(i) {
+            const peso = parseFloat(document.getElementById('editPeso').value) || lista[i].peso;
+            const factor = peso / (lista[i].peso || 100);
+            lista[i].peso = peso;
+            lista[i].prot = Math.round(lista[i].prot * factor * 10) / 10;
+            lista[i].gras = Math.round(lista[i].gras * factor * 10) / 10;
+            lista[i].carb = Math.round(lista[i].carb * factor * 10) / 10;
+            lista[i].cal = Math.round(lista[i].cal * factor * 10) / 10;
+            localStorage.setItem('miListaMacro', JSON.stringify(lista));
+            actualizarListaUI(); cerrarInfo();
+        }
+        function convertToManual(i) {
+            if (!confirm('Convertir a manual permitirá editar macros. Confirmar.')) return;
+            lista[i].source = 'manual';
+            localStorage.setItem('miListaMacro', JSON.stringify(lista));
+            editItem(i);
+        }
+
+        /* Export / util */
+        function exportCSV() {
+            if (lista.length === 0) { alert('Lista vacía'); return; }
+            const headers = ['nombre', 'peso_g', 'proteinas_g', 'grasas_g', 'carbs_g', 'kcal', 'source'];
+            const rows = lista.map(it => [it.nombre, it.peso, it.prot, it.gras, it.carb, it.cal, it.source || 'manual']);
+            const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'macros_lista.csv'; a.click(); URL.revokeObjectURL(url);
+        }
+        function downloadJSON() { const data = JSON.stringify(lista, null, 2); const blob = new Blob([data], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'macros_lista.json'; a.click(); URL.revokeObjectURL(url); }
+        function limpiarLista() { if (confirm('Limpiar toda la lista?')) { lista = []; localStorage.removeItem('miListaMacro'); actualizarListaUI(); } }
+        function toggleAllSections() { document.querySelectorAll('.seccion').forEach(s => s.classList.toggle('open')); cerrarInfo(); }
+        function focusSearch() { document.getElementById('searchInput').focus(); }
+        function cerrarInfo() { const f = document.getElementById('infoFlotante'); f.style.display = 'none'; f.setAttribute('aria-hidden', 'true'); ultimaSeleccion = null; editIndex = null; document.querySelectorAll('.alimento.selected').forEach(x => x.classList.remove('selected')); }
+        function emojiForSection(list) { return list[0]?.emoji || '🍽️' }
+        function escapeHtml(str) { return String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m])); }
+        function escapeJs(s) { return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"'); }
+        function slug(s) { return s.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''); }
+        function toggleInfoFullscreen() { const f = document.getElementById('infoFlotante'); f.classList.toggle('fullscreen'); }
+
+        /* Init */
+        renderSections();
+        actualizarListaUI();
+        const manualBtn = document.createElement('div');
+        manualBtn.style.margin = '10px auto'; manualBtn.style.maxWidth = '940px'; manualBtn.style.display = 'flex'; manualBtn.style.justifyContent = 'center'; manualBtn.style.gap = '8px';
+        manualBtn.innerHTML = `<button class="primary" onclick="abrirManual()">➕ Agregar manualmente</button>
+                           <button class="secondary" onclick="abrirHB()">⚖️ Calculadora Harris-Benedict</button>`;
+        container.insertBefore(manualBtn, container.children[1]);
+
+        try { hbGoals = JSON.parse(localStorage.getItem('hbGoals') || '[]'); } catch (e) { hbGoals = []; }
+        try { hbActiveId = localStorage.getItem('hbActiveId') ? Number(localStorage.getItem('hbActiveId')) : null; } catch (e) { hbActiveId = null; }
+        updateHeaderActiveMeta();
+
     </script>
 </body>
 
