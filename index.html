@@ -492,97 +492,158 @@
 
 <body>
     <header>
-      <div style="display:flex;align-items:center;gap:12px">
-        <h1>Macronutrientes — App</h1>
-        <div id="hbActive" style="display:none">
-          <div style="display:flex;flex-direction:column;gap:4px">
-            <div class="hb-title">Objetivo: <span id="hbName" style="font-weight:800"></span></div>
-            <div style="display:flex;gap:8px;align-items:center">
-              <div style="font-size:12px;color:rgba(255,255,255,0.95)">TDEE</div>
-              <div style="font-weight:800" id="hbTdee"></div>
+        <div style="display:flex;align-items:center;gap:12px">
+            <h1>Macronutrientes — App</h1>
+            <div id="hbActive" style="display:none">
+                <div style="display:flex;flex-direction:column;gap:4px">
+                    <div class="hb-title">Objetivo: <span id="hbName" style="font-weight:800"></span></div>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <div style="font-size:12px;color:rgba(255,255,255,0.95)">TDEE</div>
+                        <div style="font-weight:800" id="hbTdee"></div>
+                    </div>
+                </div>
+                <div class="hb-progress">
+                    <div style="font-size:11px;margin-bottom:6px;color:rgba(255,255,255,0.95)">Progreso kcal</div>
+                    <div class="bar-mini">
+                        <div id="hbCalFill" class="fill-mini fill-cal" style="width:0%"></div>
+                    </div>
+                    <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+                        <div style="width:30px;font-size:11px">P</div>
+                        <div class="bar-mini" style="flex:1">
+                            <div id="hbPFill" class="fill-mini fill-p" style="width:0%"></div>
+                        </div>
+                        <div style="width:40px;text-align:right;font-size:11px" id="hbPText">0%</div>
+                    </div>
+                    <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+                        <div style="width:30px;font-size:11px">G</div>
+                        <div class="bar-mini" style="flex:1">
+                            <div id="hbFFill" class="fill-mini fill-f" style="width:0%"></div>
+                        </div>
+                        <div style="width:40px;text-align:right;font-size:11px" id="hbFText">0%</div>
+                    </div>
+                    <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
+                        <div style="width:30px;font-size:11px">C</div>
+                        <div class="bar-mini" style="flex:1">
+                            <div id="hbCFill" class="fill-mini fill-c" style="width:0%"></div>
+                        </div>
+                        <div style="width:40px;text-align:right;font-size:11px" id="hbCText">0%</div>
+                    </div>
+                </div>
+                <button class="header-btn" style="padding:6px 8px" onclick="clearActiveHB()">✖</button>
             </div>
-          </div>
-          <div class="hb-progress">
-            <div style="font-size:11px;margin-bottom:6px;color:rgba(255,255,255,0.95)">Progreso kcal</div>
-            <div class="bar-mini">
-              <div id="hbCalFill" class="fill-mini fill-cal" style="width:0%"></div>
-            </div>
-            <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-              <div style="width:30px;font-size:11px">P</div>
-              <div class="bar-mini" style="flex:1">
-                <div id="hbPFill" class="fill-mini fill-p" style="width:0%"></div>
-              </div>
-              <div style="width:40px;text-align:right;font-size:11px" id="hbPText">0%</div>
-            </div>
-            <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-              <div style="width:30px;font-size:11px">G</div>
-              <div class="bar-mini" style="flex:1">
-                <div id="hbFFill" class="fill-mini fill-f" style="width:0%"></div>
-              </div>
-              <div style="width:40px;text-align:right;font-size:11px" id="hbFText">0%</div>
-            </div>
-            <div style="display:flex;gap:6px;margin-top:6px;align-items:center">
-              <div style="width:30px;font-size:11px">C</div>
-              <div class="bar-mini" style="flex:1">
-                <div id="hbCFill" class="fill-mini fill-c" style="width:0%"></div>
-              </div>
-              <div style="width:40px;text-align:right;font-size:11px" id="hbCText">0%</div>
-            </div>
-          </div>
-          <button class="header-btn" style="padding:6px 8px" onclick="clearActiveHB()">✖</button>
         </div>
-      </div>
-  
-      <div class="controls">
-        <div class="search" title="Buscar alimento">
-          <input id="searchInput" placeholder="Buscar alimento..." />
-          <button class="header-btn" onclick="filterAlimentos()">🔎</button>
+
+        <div class="controls">
+            <div class="search" title="Buscar alimento">
+                <input id="searchInput" placeholder="Buscar alimento..." />
+                <button class="header-btn" onclick="filterAlimentos()">🔎</button>
+            </div>
+            <button class="header-btn" onclick="exportCSV()">Exportar CSV</button>
+            <button class="header-btn" onclick="limpiarLista()">Limpiar</button>
         </div>
-        <button class="header-btn" onclick="exportCSV()">Exportar CSV</button>
-        <button class="header-btn" onclick="limpiarLista()">Limpiar</button>
-      </div>
     </header>
-  
+
     <div class="container" id="container"></div>
-  
+
     <!-- Panel flotante (calculadora / descripciones / HB) -->
     <div id="infoFlotante" role="dialog" aria-hidden="true"></div>
-  
+
     <!-- Lista seleccionada -->
     <div id="listaSeleccion">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <h3>Lista de alimentos seleccionados</h3>
-        <div class="small">Toca ❌ para borrar • ✏️ editar</div>
-      </div>
-      <ul id="alimentosSeleccionados"></ul>
-  
-      <div style="display:flex;gap:12px;margin-top:10px;align-items:center;justify-content:space-between">
-        <div>
-          <div class="small">Totales</div>
-          <div><b>Proteínas:</b> <span id="totalProteinas">0</span> g — <b>Grasas:</b> <span id="totalGrasas">0</span> g —
-            <b>Carbs:</b> <span id="totalCarbs">0</span> g
-          </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+            <h3>Lista de alimentos seleccionados</h3>
+            <div class="small">Toca ❌ para borrar • ✏️ editar</div>
         </div>
-        <div><b>Calorías:</b> <span id="totalCalorias">0</span> kcal</div>
-      </div>
+        <ul id="alimentosSeleccionados"></ul>
+
+        <div style="display:flex;gap:12px;margin-top:10px;align-items:center;justify-content:space-between">
+            <div>
+                <div class="small">Totales</div>
+                <div><b>Proteínas:</b> <span id="totalProteinas">0</span> g — <b>Grasas:</b> <span
+                        id="totalGrasas">0</span> g —
+                    <b>Carbs:</b> <span id="totalCarbs">0</span> g
+                </div>
+            </div>
+            <div><b>Calorías:</b> <span id="totalCalorias">0</span> kcal</div>
+        </div>
     </div>
-  
+
     <div class="notes">
-      <strong>Notas:</strong>
-      <ul>
-        <li>Valores aproximados por 100 g de la porción comestible (si no se indica lo contrario).</li>
-        <li>Elige la versión cruda o cocida según necesites (ej. arroz crudo vs cocido).</li>
-        <li>Las descripciones son breves; pulsa "Mostrar descripción" en la calculadora para leerla.</li>
-      </ul>
+        <strong>Notas:</strong>
+        <ul>
+            <li>Valores aproximados por 100 g de la porción comestible (si no se indica lo contrario).</li>
+            <li>Elige la versión cruda o cocida según necesites (ej. arroz crudo vs cocido).</li>
+            <li>Las descripciones son breves; pulsa "Mostrar descripción" en la calculadora para leerla.</li>
+        </ul>
     </div>
-  
+
     <footer class="appbar">
-      <div class="bar">
-        <button onclick="focusSearch()">Buscar</button>
-        <button class="muted" onclick="toggleAllSections()">Abrir/Cerrar secciones</button>
-        <button onclick="downloadJSON()">Guardar / Descargar</button>
-      </div>
+        <div class="bar">
+            <button onclick="focusSearch()">Buscar</button>
+            <button class="muted" onclick="toggleAllSections()">Abrir/Cerrar secciones</button>
+            <button onclick="downloadJSON()">Guardar / Descargar</button>
+        </div>
     </footer>
+
+    <script>
+        /* Datos base (puedes ampliar) */
+        const foods = [
+            { section: 'Carnes', emoji: '🥩', name: 'Carne vacuna (asado)', desc: 'Cruda, porción comestible sin hueso.', prot: 26, gras: 20, carb: 0, cal: 250, pesoBase: 100 },
+            { section: 'Carnes', emoji: '🍗', name: 'Pollo (pechuga sin piel)', desc: 'Crudo, sin piel.', prot: 31, gras: 3.6, carb: 0, cal: 165, pesoBase: 100 },
+            { section: 'Carnes', emoji: '🥚', name: 'Huevo entero', desc: 'Sin cáscara.', prot: 13, gras: 11, carb: 1.1, cal: 155, pesoBase: 100 },
+            { section: 'Cereales', emoji: '🍚', name: 'Arroz blanco (crudo)', desc: 'Valores en crudo (usar si mides antes de cocinar).', prot: 7, gras: 0.6, carb: 77, cal: 365, pesoBase: 100 },
+            { section: 'Cereales', emoji: '🍚', name: 'Arroz blanco (cocido)', desc: 'Valores por 100 g cocidos.', prot: 2.7, gras: 0.3, carb: 28, cal: 130, pesoBase: 100 },
+            { section: 'Verduras', emoji: '🥕', name: 'Zanahoria', desc: 'Cruda, lavada y pelada.', prot: 0.9, gras: 0.2, carb: 10, cal: 41, pesoBase: 100 },
+            { section: 'Frutas', emoji: '🍎', name: 'Manzana (con piel)', desc: 'Con piel.', prot: 0.5, gras: 0.3, carb: 14, cal: 52, pesoBase: 100 },
+            { section: 'Lácteos', emoji: '🥛', name: 'Leche entera', desc: 'Por 100 ml.', prot: 3.3, gras: 3.7, carb: 4.8, cal: 61, pesoBase: 100 },
+            { section: 'Frutos secos', emoji: '🥜', name: 'Almendras', desc: 'Sin cáscara.', prot: 21, gras: 50, carb: 22, cal: 579, pesoBase: 100 },
+            { section: 'Bebidas', emoji: '🥤', name: 'Gaseosa (cola)', desc: 'Por 100 ml.', prot: 0, gras: 0, carb: 10, cal: 42, pesoBase: 100 },
+            { section: 'Panificados', emoji: '🥖', name: 'Pan francés', desc: 'Por 100 g.', prot: 8, gras: 1, carb: 49, cal: 250, pesoBase: 100 },
+        ];
+
+        /* Estado */
+        let lista = JSON.parse(localStorage.getItem('miListaMacro') || '[]');
+        let hbGoals = JSON.parse(localStorage.getItem('hbGoals') || '[]');
+        let hbActiveId = localStorage.getItem('hbActiveId') ? Number(localStorage.getItem('hbActiveId')) : null;
+        let ultimaSeleccion = null;
+        let editIndex = null;
+        const container = document.getElementById('container');
+
+        /* Render secciones y alimentos */
+        function renderSections() {
+            const groups = {};
+            foods.forEach(f => { if (!groups[f.section]) groups[f.section] = []; groups[f.section].push(f); });
+            container.innerHTML = '';
+            const topBanner = document.createElement('div');
+            topBanner.style.margin = '8px 0 12px 0';
+            topBanner.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>Alimentos precargados:</strong> ${foods.length} • Secciones: ${Object.keys(groups).length}</div>
+        <div class="small">Doble click o clic en título para abrir/cerrar</div>
+      </div>`;
+            container.appendChild(topBanner);
+
+            Object.keys(groups).forEach(sectionName => {
+                const sec = document.createElement('section'); sec.className = 'seccion'; sec.id = 's-' + slug(sectionName);
+                const hdr = document.createElement('header');
+                hdr.innerHTML = `<h2><span style="font-size:18px">${emojiForSection(groups[sectionName])}</span> ${escapeHtml(sectionName)}</h2><div class="chev">▶</div>`;
+                hdr.onclick = () => toggleSeccion(sec.id);
+                hdr.ondblclick = () => toggleSeccion(sec.id);
+                sec.appendChild(hdr);
+                const content = document.createElement('div'); content.className = 'content';
+                groups[sectionName].forEach(f => {
+                    const a = document.createElement('div'); a.className = 'alimento';
+                    a.dataset.name = f.name; a.dataset.desc = f.desc || '';
+                    a.dataset.prot = f.prot; a.dataset.gras = f.gras; a.dataset.carb = f.carb; a.dataset.cal = f.cal; a.dataset.pesobase = f.pesoBase;
+                    a.innerHTML = `<div class="emoji">${escapeHtml(f.emoji || '🍽️')}</div><div class="name">${escapeHtml(f.name)}</div><div class="meta">100 g • ${f.cal} kcal</div>`;
+                    a.ondblclick = () => openCalcFromDataset(a);
+                    a.onclick = () => selectThenOpen(a);
+                    content.appendChild(a);
+                });
+                sec.appendChild(content);
+                container.appendChild(sec);
+            });
+        }
+    </script>
 </body>
 
 </html>
